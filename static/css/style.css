@@ -3,6 +3,7 @@
     --bg-base: #080d1a;
     --bg-surface: #0f172a;
     --bg-surface-hover: #1e293b;
+    --bg-sidebar: #0b0f19;
     --border-color: rgba(255, 255, 255, 0.08);
     --border-color-glow: rgba(59, 130, 246, 0.3);
     
@@ -33,7 +34,36 @@
     
     --sidebar-width: 320px;
     --transition-base: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    --bg-tweet: #000000;
+    --text-tweet: #ffffff;
 }
+
+body.light-theme {
+    --bg-base: #f1f5f9;
+    --bg-surface: #ffffff;
+    --bg-surface-hover: #f8fafc;
+    --bg-sidebar: #f8fafc;
+    --border-color: rgba(0, 0, 0, 0.08);
+    --border-color-glow: rgba(59, 130, 246, 0.15);
+    
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    
+    --color-feature-bg: rgba(16, 185, 129, 0.08);
+    --color-issue-bg: rgba(239, 68, 68, 0.08);
+    --color-deprecation-bg: rgba(249, 115, 22, 0.08);
+    --color-fix-bg: rgba(59, 130, 246, 0.08);
+    --color-announcement-bg: rgba(139, 92, 246, 0.08);
+    --color-general-bg: rgba(100, 116, 139, 0.08);
+    
+    --primary-glow: rgba(59, 130, 246, 0.15);
+    
+    --bg-tweet: #f7f9f9;
+    --text-tweet: #0f172a;
+}
+
 
 /* --- Base Resets & Layout --- */
 * {
@@ -59,7 +89,7 @@ body {
 /* --- Sidebar Styling --- */
 .sidebar {
     width: var(--sidebar-width);
-    background-color: #0b0f19;
+    background-color: var(--bg-sidebar);
     border-right: 1px solid var(--border-color);
     padding: 2rem 1.5rem;
     display: flex;
@@ -546,7 +576,7 @@ body {
 
 /* Card Content Styling */
 .note-body {
-    color: #e2e8f0;
+    color: var(--text-primary);
     font-size: 0.95rem;
 }
 
@@ -667,7 +697,7 @@ body {
 
 /* X UI Simulator */
 .tweet-preview-card {
-    background-color: #000;
+    background-color: var(--bg-tweet);
     border: 1px solid var(--border-color);
     border-radius: 14px;
     padding: 1.25rem;
@@ -717,7 +747,7 @@ body {
     background: none;
     border: none;
     resize: none;
-    color: #fff;
+    color: var(--text-tweet);
     font-family: inherit;
     font-size: 1rem;
     line-height: 1.5;

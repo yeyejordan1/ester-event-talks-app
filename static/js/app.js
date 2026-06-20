@@ -19,6 +19,11 @@ const searchInput = document.getElementById('search-input');
 const categoryFilters = document.getElementById('category-filters');
 const retryBtn = document.getElementById('retry-btn');
 const resetFiltersBtn = document.getElementById('reset-filters-btn');
+const themeToggleBtn = document.getElementById('theme-toggle-btn');
+const sunIcon = document.querySelector('.sun-icon');
+const moonIcon = document.querySelector('.moon-icon');
+const exportCsvBtn = document.getElementById('export-csv-btn');
+
 
 // Modal Elements
 const tweetModal = document.getElementById('tweet-modal');
@@ -46,7 +51,9 @@ if (progressCircle) {
 
 // --- Event Listeners ---
 document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
     fetchReleaseNotes(false);
+
     
     // Refresh handlers
     refreshBtn.addEventListener('click', () => fetchReleaseNotes(true));
@@ -81,7 +88,14 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Submit Tweet handler
     submitTweetBtn.addEventListener('click', postToTwitter);
+    
+    // Theme toggle handler
+    themeToggleBtn.addEventListener('click', toggleTheme);
+    
+    // Export to CSV handler
+    exportCsvBtn.addEventListener('click', exportToCSV);
 });
+
 
 // --- API Interaction ---
 async function fetchReleaseNotes(forceRefresh = false) {
@@ -304,8 +318,9 @@ function renderNotesList() {
         // Action Event Listeners inside the cards
         card.querySelector('.copy-btn').addEventListener('click', (e) => {
             e.stopPropagation();
-            copyLinkToClipboard(note.link);
+            copyNoteToClipboard(note);
         });
+
         
         card.querySelector('.tweet-btn').addEventListener('click', (e) => {
             e.stopPropagation();
@@ -317,6 +332,16 @@ function renderNotesList() {
 }
 
 // --- Helper Actions ---
+function copyNoteToClipboard(note) {
+    const textToCopy = `BigQuery Release Note (${note.date}) - [${note.type}]:\n${note.content_text}\n\nLink: ${note.link}`;
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        showToast('Release note copied to clipboard!');
+    }).catch(err => {
+        console.error('Could not copy text: ', err);
+        showToast('Failed to copy text.');
+    });
+}
+
 function copyLinkToClipboard(link) {
     navigator.clipboard.writeText(link).then(() => {
         showToast('Link copied to clipboard!');
@@ -325,6 +350,70 @@ function copyLinkToClipboard(link) {
         showToast('Failed to copy link.');
     });
 }
+
+// --- Theme Management ---
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+    const isLight = savedTheme === 'light' || (!savedTheme && prefersLight);
+    
+    if (isLight) {
+        document.body.classList.add('light-theme');
+        updateThemeIcons(true);
+    } else {
+        document.body.classList.remove('light-theme');
+        updateThemeIcons(false);
+    }
+}
+
+function toggleTheme() {
+    const isLight = document.body.classList.toggle('light-theme');
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    updateThemeIcons(isLight);
+}
+
+function updateThemeIcons(isLight) {
+    if (isLight) {
+        sunIcon.classList.remove('hidden');
+        moonIcon.classList.add('hidden');
+    } else {
+        sunIcon.classList.add('hidden');
+        moonIcon.classList.remove('hidden');
+    }
+}
+
+// --- CSV Export ---
+function exportToCSV() {
+    if (filteredNotes.length === 0) {
+        showToast('No notes to export.');
+        return;
+    }
+    
+    const headers = ['ID', 'Date', 'Type', 'Content Text', 'Link'];
+    const rows = filteredNotes.map(note => [
+        `"${note.id.replace(/"/g, '""')}"`,
+        `"${note.date.replace(/"/g, '""')}"`,
+        `"${note.type.replace(/"/g, '""')}"`,
+        `"${note.content_text.replace(/"/g, '""')}"`,
+        `"${note.link.replace(/"/g, '""')}"`
+    ]);
+    
+    // Add UTF-8 BOM so Excel opens it with correct encoding
+    const BOM = '\uFEFF';
+    const csvContent = BOM + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `bigquery_release_notes_${activeCategory}_export.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast('CSV exported successfully!');
+}
+
 
 function showToast(message) {
     toastMessage.textContent = message;
